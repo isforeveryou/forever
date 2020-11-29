@@ -20,12 +20,21 @@ public class ExcelResolver {
 
         ExcelResolver resolver = new ExcelResolver();
 
+        String filePath = "D:" + File.separator + "TestFile" + File.separator + "押品系统数据表-v0.1.xlsx";
+
         List<Map<String, String>> datas =
-                resolver.parseExcelWithRow("D:\\押品系统\\押品信息新增-接口设计V0.1.xlsx", "CT1CBA01I", false, "collaNo","mainRightEffectEndDt","crtiItems");
+                resolver.parseExcelWithRow(filePath, "押品基本信息表", 7, false, 1, 2, 3);
 
         System.out.println(datas.toString());
     }
 
+    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, String... rowNames) throws IOException {
+        return parseExcelWithRow(excelPath, sheetName, true, rowNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(excelPath, sheetName, 1, true, rowIndexes);
+    }
 
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
 
@@ -52,6 +61,41 @@ public class ExcelResolver {
         return column >= 0 ? readColumnValue(sheet, indexMap, outputEmpty, column + 1) : new ArrayList<>(0);
     }
 
+    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(excelPath, sheetName, 1, outputEmpty, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+
+        if (rowIndexes == null || rowIndexes.length <= 0) {
+            return new ArrayList<>(0);
+        }
+
+        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+
+        Sheet sheet = workbook.getSheet(sheetName);
+
+        if (sheet == null) {
+            throw new RuntimeException("no such sheet name:" + sheetName);
+        }
+
+        Map<String, Integer> indexMap = new HashMap<>(rowIndexes.length);
+
+        for (Integer rowIndex : rowIndexes) {
+            indexMap.put(String.valueOf(rowIndex), rowIndex - 1);
+        }
+
+        return readColumnValue(sheet, indexMap, outputEmpty, columnIndex - 1);
+    }
+
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, String... columnNames) throws IOException {
+        return parseExcelWithColumn(excelPath, sheetName, true, columnNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(excelPath, sheetName, 1, true, columnIndexes);
+    }
 
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
 
@@ -81,6 +125,33 @@ public class ExcelResolver {
         }
 
         return new ArrayList<>(0);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(excelPath, sheetName, 1, outputEmpty, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+
+        if (columnIndexes == null || columnIndexes.length <= 0) {
+            return new ArrayList<>(0);
+        }
+
+        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+
+        Sheet sheet = workbook.getSheet(sheetName);
+
+        if (sheet == null) {
+            throw new RuntimeException("no such sheet name:" + sheetName);
+        }
+
+        Map<String, Integer> indexMap = new HashMap<>(columnIndexes.length);
+
+        for (Integer columnIndex : columnIndexes) {
+            indexMap.put(String.valueOf(columnIndex), columnIndex - 1);
+        }
+
+        return readRowValue(sheet, indexMap, outputEmpty, rowIndex - 1);
     }
 
 
@@ -154,7 +225,7 @@ public class ExcelResolver {
             Row temp = sheet.getRow(row);
             int cells = temp == null ? 0 : temp.getPhysicalNumberOfCells();
 
-            if (columnIndex > cells && cells > 0) {
+            if (cells > columnIndex && cells > 0 && columnIndex > -1) {
                 String cellValue = getCellStringValue(temp.getCell(columnIndex)).trim();
 
                 if (indexMap.get(cellValue) != null) {
@@ -212,13 +283,16 @@ public class ExcelResolver {
             case STRING: return cell.getStringCellValue();
             case ERROR: return String.valueOf(cell.getErrorCellValue());
             case BOOLEAN: return String.valueOf(cell.getBooleanCellValue());
-            case NUMERIC: return String.valueOf((int) cell.getNumericCellValue());
             case FORMULA:
                 try {
-                    return String.valueOf((int) cell.getNumericCellValue());
+                    String numeric =  String.valueOf(cell.getNumericCellValue());
+                    return numeric.indexOf(".") > 0 ? numeric.replaceAll("0+?$", "").replaceAll("[.]$", "") : numeric;
                 } catch (IllegalStateException e) {
                     return String.valueOf(cell.getRichStringCellValue());
                 }
+            case NUMERIC:
+                String numeric =  String.valueOf(cell.getNumericCellValue());
+                return numeric.indexOf(".") > 0 ? numeric.replaceAll("0+?$", "").replaceAll("[.]$", "") : numeric;
             default: return "";
         }
     }
