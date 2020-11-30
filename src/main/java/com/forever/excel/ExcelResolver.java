@@ -23,7 +23,7 @@ public class ExcelResolver {
         String filePath = "D:" + File.separator + "TestFile" + File.separator + "押品系统数据表-v0.1.xlsx";
 
         List<Map<String, String>> datas =
-                resolver.parseExcelWithRow(filePath, "押品基本信息表", 7, false, 1, 2, 3);
+                resolver.parseExcelWithColumn(filePath, "押品基本信息表", 1, 2, 3, 4, 5, 7, 8);
 
         System.out.println(datas.toString());
     }
@@ -37,12 +37,16 @@ public class ExcelResolver {
     }
 
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
+        return parseExcelWithRow(new File(excelPath), sheetName, outputEmpty, rowNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
 
         if (rowNames == null || rowNames.length <= 0) {
             return new ArrayList<>(0);
         }
 
-        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -66,12 +70,16 @@ public class ExcelResolver {
     }
 
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(new File(excelPath), sheetName, columnIndex, outputEmpty, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
 
         if (rowIndexes == null || rowIndexes.length <= 0) {
             return new ArrayList<>(0);
         }
 
-        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -89,6 +97,7 @@ public class ExcelResolver {
     }
 
 
+
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, String... columnNames) throws IOException {
         return parseExcelWithColumn(excelPath, sheetName, true, columnNames);
     }
@@ -98,12 +107,16 @@ public class ExcelResolver {
     }
 
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
+        return parseExcelWithColumn(new File(excelPath), sheetName, outputEmpty, columnNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
 
         if (columnNames == null || columnNames.length <= 0) {
             return new ArrayList<>(0);
         }
 
-        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -132,12 +145,16 @@ public class ExcelResolver {
     }
 
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(new File(excelPath), sheetName, rowIndex, outputEmpty, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
 
         if (columnIndexes == null || columnIndexes.length <= 0) {
             return new ArrayList<>(0);
         }
 
-        Workbook workbook = WorkbookFactory.create(new File(excelPath));
+        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -165,6 +182,10 @@ public class ExcelResolver {
         int rowNumbers = sheet.getLastRowNum() + 1;
         for (; rowIndex < rowNumbers; rowIndex++) {
             Row temp = sheet.getRow(rowIndex);
+
+            if (temp == null) {
+                continue;
+            }
 
             boolean isEmpty = true;
             Map<String, String> result = new HashMap<>(columnIndexMap.size());
@@ -197,11 +218,14 @@ public class ExcelResolver {
 
             for (Map.Entry<String, Integer> entry : rowIndexMap.entrySet()) {
                 Row temp = sheet.getRow(entry.getValue());
-                columns = Math.max(temp.getPhysicalNumberOfCells(), columns);
-                String value = getCellStringValue(temp.getCell(columnIndex));
 
-                result.put(entry.getKey(), value);
-                isEmpty = isEmpty && StringUtils.isBlank(value);
+                if (temp != null) {
+                    columns = Math.max(temp.getPhysicalNumberOfCells(), columns);
+                    String value = getCellStringValue(temp.getCell(columnIndex));
+
+                    result.put(entry.getKey(), value);
+                    isEmpty = isEmpty && StringUtils.isBlank(value);
+                }
             }
 
             if (!isEmpty || outputEmpty) {
