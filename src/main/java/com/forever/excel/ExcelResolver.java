@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,37 +17,35 @@ import java.util.Map;
  */
 public class ExcelResolver {
 
-    public static void main(String[] args) throws Exception {
-
-        ExcelResolver resolver = new ExcelResolver();
-
-        String filePath = "D:" + File.separator + "TestFile" + File.separator + "押品系统数据表-v0.1.xlsx";
-
-        List<Map<String, String>> datas =
-                resolver.parseExcelWithColumn(filePath, "押品基本信息表", 1, 2, 3, 4, 5, 7, 8);
-
-        System.out.println(datas.toString());
-    }
-
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, String... rowNames) throws IOException {
-        return parseExcelWithRow(excelPath, sheetName, true, rowNames);
-    }
-
-    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer... rowIndexes) throws IOException {
-        return parseExcelWithRow(excelPath, sheetName, 1, true, rowIndexes);
+        return parseExcelWithRow(new File(excelPath), sheetName, true, rowNames);
     }
 
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
         return parseExcelWithRow(new File(excelPath), sheetName, outputEmpty, rowNames);
     }
 
+    public List<Map<String, String>> parseExcelWithRow(InputStream excelStream, String sheetName, String... rowNames) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelStream), sheetName, true, rowNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(InputStream excelStream, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelStream), sheetName, outputEmpty, rowNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, String... rowNames) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelFile), sheetName, true, rowNames);
+    }
+
     public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelFile), sheetName, outputEmpty, rowNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(Workbook workbook, String sheetName, boolean outputEmpty, String... rowNames) throws IOException {
 
         if (rowNames == null || rowNames.length <= 0) {
             return new ArrayList<>(0);
         }
-
-        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -65,21 +64,51 @@ public class ExcelResolver {
         return column >= 0 ? readColumnValue(sheet, indexMap, outputEmpty, column + 1) : new ArrayList<>(0);
     }
 
+
+
+
+
+    public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(new File(excelPath), sheetName, 1, true, rowIndexes);
+    }
+
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, boolean outputEmpty, Integer... rowIndexes) throws IOException {
-        return parseExcelWithRow(excelPath, sheetName, 1, outputEmpty, rowIndexes);
+        return parseExcelWithRow(new File(excelPath), sheetName, 1, outputEmpty, rowIndexes);
     }
 
     public List<Map<String, String>> parseExcelWithRow(String excelPath, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
         return parseExcelWithRow(new File(excelPath), sheetName, columnIndex, outputEmpty, rowIndexes);
     }
 
+    public List<Map<String, String>> parseExcelWithRow(InputStream excelStream, String sheetName, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelStream), sheetName, 1, true, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(InputStream excelStream, String sheetName, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelStream), sheetName, 1, outputEmpty, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(InputStream excelStream, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelStream), sheetName, columnIndex, outputEmpty, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelFile), sheetName, 1, true, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelFile), sheetName, 1, outputEmpty, rowIndexes);
+    }
+
     public List<Map<String, String>> parseExcelWithRow(File excelFile, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
+        return parseExcelWithRow(WorkbookFactory.create(excelFile), sheetName, columnIndex, outputEmpty, rowIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithRow(Workbook workbook, String sheetName, Integer columnIndex, boolean outputEmpty, Integer... rowIndexes) throws IOException {
 
         if (rowIndexes == null || rowIndexes.length <= 0) {
             return new ArrayList<>(0);
         }
-
-        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -98,25 +127,38 @@ public class ExcelResolver {
 
 
 
-    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, String... columnNames) throws IOException {
-        return parseExcelWithColumn(excelPath, sheetName, true, columnNames);
-    }
 
-    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer... columnIndexes) throws IOException {
-        return parseExcelWithColumn(excelPath, sheetName, 1, true, columnIndexes);
+
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, String... columnNames) throws IOException {
+        return parseExcelWithColumn(new File(excelPath), sheetName, true, columnNames);
     }
 
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
         return parseExcelWithColumn(new File(excelPath), sheetName, outputEmpty, columnNames);
     }
 
+    public List<Map<String, String>> parseExcelWithColumn(InputStream excelStream, String sheetName, String... columnNames) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelStream), sheetName, true, columnNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(InputStream excelStream, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelStream), sheetName, outputEmpty, columnNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, String... columnNames) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelFile), sheetName, true, columnNames);
+    }
+
     public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, boolean outputEmpty, String... columnNames) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelFile), sheetName, outputEmpty, columnNames);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(Workbook workbook, String sheetName, boolean outputEmpty, String... columnNames) {
 
         if (columnNames == null || columnNames.length <= 0) {
             return new ArrayList<>(0);
         }
-
-        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
@@ -140,21 +182,52 @@ public class ExcelResolver {
         return new ArrayList<>(0);
     }
 
+
+
+
+
+
+    public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(new File(excelPath), sheetName, 1, true, columnIndexes);
+    }
+
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, boolean outputEmpty, Integer... columnIndexes) throws IOException {
-        return parseExcelWithColumn(excelPath, sheetName, 1, outputEmpty, columnIndexes);
+        return parseExcelWithColumn(new File(excelPath), sheetName, 1, outputEmpty, columnIndexes);
     }
 
     public List<Map<String, String>> parseExcelWithColumn(String excelPath, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
         return parseExcelWithColumn(new File(excelPath), sheetName, rowIndex, outputEmpty, columnIndexes);
     }
 
+    public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelFile), sheetName, 1, true, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelFile), sheetName, 1, outputEmpty, columnIndexes);
+    }
+
     public List<Map<String, String>> parseExcelWithColumn(File excelFile, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelFile), sheetName, rowIndex, outputEmpty, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(InputStream excelStream, String sheetName, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelStream), sheetName, 1, true, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(InputStream excelStream, String sheetName, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelStream), sheetName, 1, outputEmpty, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(InputStream excelStream, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) throws IOException {
+        return parseExcelWithColumn(WorkbookFactory.create(excelStream), sheetName, rowIndex, outputEmpty, columnIndexes);
+    }
+
+    public List<Map<String, String>> parseExcelWithColumn(Workbook workbook, String sheetName, Integer rowIndex, boolean outputEmpty, Integer... columnIndexes) {
 
         if (columnIndexes == null || columnIndexes.length <= 0) {
             return new ArrayList<>(0);
         }
-
-        Workbook workbook = WorkbookFactory.create(excelFile);
 
         Sheet sheet = workbook.getSheet(sheetName);
 
