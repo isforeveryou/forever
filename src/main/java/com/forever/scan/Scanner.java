@@ -1,7 +1,5 @@
 package com.forever.scan;
 
-import sun.net.util.URLUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

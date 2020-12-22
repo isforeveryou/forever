@@ -1,15 +1,13 @@
 package com.forever.excel;
 
+import com.forever.utils.OptionalBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author WJX
@@ -47,11 +45,7 @@ public class ExcelResolver {
             return new ArrayList<>(0);
         }
 
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        if (sheet == null) {
-            throw new RuntimeException("no such sheet name:" + sheetName);
-        }
+        Sheet sheet = Optional.of(workbook.getSheet(sheetName)).orElseThrow(() -> new RuntimeException("no such sheet name:" + sheetName));
 
         Map<String, Integer> indexMap = new HashMap<>(rowNames.length);
 
@@ -110,11 +104,7 @@ public class ExcelResolver {
             return new ArrayList<>(0);
         }
 
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        if (sheet == null) {
-            throw new RuntimeException("no such sheet name:" + sheetName);
-        }
+        Sheet sheet = Optional.of(workbook.getSheet(sheetName)).orElseThrow(() -> new RuntimeException("no such sheet name:" + sheetName));
 
         Map<String, Integer> indexMap = new HashMap<>(rowIndexes.length);
 
@@ -160,11 +150,7 @@ public class ExcelResolver {
             return new ArrayList<>(0);
         }
 
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        if (sheet == null) {
-            throw new RuntimeException("no such sheet name:" + sheetName);
-        }
+        Sheet sheet = Optional.of(workbook.getSheet(sheetName)).orElseThrow(() -> new RuntimeException("no such sheet name:" + sheetName));
 
         Map<String, Integer> indexMap = new HashMap<>(columnNames.length);
 
@@ -229,11 +215,7 @@ public class ExcelResolver {
             return new ArrayList<>(0);
         }
 
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        if (sheet == null) {
-            throw new RuntimeException("no such sheet name:" + sheetName);
-        }
+        Sheet sheet = Optional.of(workbook.getSheet(sheetName)).orElseThrow(() -> new RuntimeException("no such sheet name:" + sheetName));
 
         Map<String, Integer> indexMap = new HashMap<>(columnIndexes.length);
 
@@ -269,9 +251,8 @@ public class ExcelResolver {
                 isEmpty = isEmpty && StringUtils.isBlank(value);
             }
 
-            if (!isEmpty || outputEmpty) {
-                results.add(result);
-            }
+            boolean finalIsEmpty = isEmpty;
+            OptionalBean.ofNullable(result).ifPresent(() -> !finalIsEmpty || outputEmpty, results::add);
         }
         return results;
     }
@@ -291,7 +272,6 @@ public class ExcelResolver {
 
             for (Map.Entry<String, Integer> entry : rowIndexMap.entrySet()) {
                 Row temp = sheet.getRow(entry.getValue());
-
                 if (temp != null) {
                     columns = Math.max(temp.getPhysicalNumberOfCells(), columns);
                     String value = getCellStringValue(temp.getCell(columnIndex));
@@ -301,9 +281,8 @@ public class ExcelResolver {
                 }
             }
 
-            if (!isEmpty || outputEmpty) {
-                results.add(result);
-            }
+            boolean finalIsEmpty = isEmpty;
+            OptionalBean.ofNullable(result).ifPresent(() -> !finalIsEmpty || outputEmpty, results::add);
         }
 
         return results;

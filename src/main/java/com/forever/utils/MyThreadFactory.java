@@ -1,6 +1,8 @@
 package com.forever.utils;
 
-import com.sun.istack.internal.NotNull;
+
+import org.springframework.lang.NonNull;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -13,7 +15,7 @@ public class MyThreadFactory implements ThreadFactory {
     private AtomicInteger threadId = new AtomicInteger(1);
 
     @Override
-    public Thread newThread(@NotNull Runnable r) {
+    public Thread newThread(@NonNull Runnable r) {
         String threadName = "FOREVER-TCC-" + threadId.incrementAndGet();
         return new Thread(r, threadName);
     }

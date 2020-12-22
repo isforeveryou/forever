@@ -1,11 +1,11 @@
 package com.forever.utils;
 
-import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,7 +21,7 @@ public class SpringUtils implements ApplicationContextAware {
 
 
     @Override
-    public void setApplicationContext(@NotNull ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
         if (SpringUtils.context == null) {
             context = applicationContext;
             logger.info("applicationContext configuration success");
