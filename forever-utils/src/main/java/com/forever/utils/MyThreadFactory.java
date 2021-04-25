@@ -16,7 +16,7 @@ public class MyThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(@NonNull Runnable r) {
-        String threadName = "FOREVER-TCC-" + threadId.incrementAndGet();
+        String threadName = "FOREVER-" + threadId.incrementAndGet();
         return new Thread(r, threadName);
     }
 }
